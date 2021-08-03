@@ -4,17 +4,17 @@ pipeline {
         timeout(time: 30, unit: 'MINUTES')
     }
     agent any 
-        tools {nodejs "Whatever"}
+        tools {nodejs "mynodejs"}
 
     environment {
         //TODO: Edit these vars as per your env
-        DEV_PROJECT = "project-dev"
-        STAGE_PROJECT = "project-stage"
-        APP_GIT_URL = "https://github.com/Omar-Openshift/node1"
-        NEXUS_SERVER = "https://nexus-project-devops.dte-ocp46-68mjnz-915b3b336cabec458a7c7ec2aa7c625f-0000.us-east.containers.appdomain.cloud/repository/npm-group-repo"
+        DEV_PROJECT = "bookstore-dev"
+        STAGE_PROJECT = "bookstore-stage"
+        APP_GIT_URL = "https://github.com/galaxy78-openshift-pipeline/omar-node1-dev"
+        NEXUS_SERVER = "https://nexus-cicd.dte-ocp46-t24sot-915b3b336cabec458a7c7ec2aa7c625f-0000.us-east.containers.appdomain.cloud/repository/npm-group/"
 
         // DO NOT CHANGE THE GLOBAL VARS BELOW THIS LINE
-        APP_NAME = "node1app"
+        APP_NAME = "omar-node1app"
     }
 
     stages {
