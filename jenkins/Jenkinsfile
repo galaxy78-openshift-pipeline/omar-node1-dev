@@ -1,0 +1,67 @@
+pipeline {
+    options {
+        // set a timeout of 30 minutes for this pipeline
+        timeout(time: 30, unit: 'MINUTES')
+    }
+    agent any 
+        tools {nodejs "Whatever"}
+
+    environment {
+        //TODO: Edit these vars as per your env
+        DEV_PROJECT = "project-dev"
+        STAGE_PROJECT = "project-stage"
+        APP_GIT_URL = "https://github.com/Omar-Openshift/node1"
+        NEXUS_SERVER = "https://nexus-project-devops.dte-ocp46-68mjnz-915b3b336cabec458a7c7ec2aa7c625f-0000.us-east.containers.appdomain.cloud/repository/npm-group-repo"
+
+        // DO NOT CHANGE THE GLOBAL VARS BELOW THIS LINE
+        APP_NAME = "node1app"
+    }
+
+    stages {
+
+        stage('NPM Install') {
+            steps {
+                echo '### Installing NPM dependencies ###'
+                sh '''
+                        npm config set registry ${NEXUS_SERVER}
+                        npm install
+                   '''
+            }
+        }
+
+        stage('Run Unit Tests') {
+            steps {
+                echo '### Running unit tests ###'
+                sh 'npm test'
+            }
+        }
+
+        stage('Run Linting Tools') {
+            steps {
+                echo '### Running eslint on code ###'
+                sh 'npm run lint'
+            }
+        }   
+
+        stage('Launch new app in DEV env') {
+            steps {
+                echo '### Cleaning existing resources in DEV env ###'
+                sh '''
+                        oc -n${DEV_PROJECT} delete all -l app=${APP_NAME}
+                        sleep 5
+                   '''
+
+                echo '### Creating a new app in DEV env ###'
+                sh '''
+				       oc new-app --as-deployment-config \
+					   --name ${APP_NAME} nodejs:12~${APP_GIT_URL} \
+					   --build-env npm_config_registry=${NEXUS_SERVER} \
+					   -n${DEV_PROJECT}
+					   
+					   oc -n${DEV_PROJECT} expose svc/${APP_NAME}
+				'''
+            }
+        }
+
+    }
+}
